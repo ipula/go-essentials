@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 )
 
 type FileManager struct {
@@ -32,7 +33,7 @@ func (fm *FileManager) ReadLines() ([]string, error) {
 		fmt.Println("Error reading file:", err)
 		return nil, err
 	}
-	file.Close()
+	defer file.Close()
 	return lines, nil
 }
 
@@ -42,12 +43,15 @@ func (fm *FileManager) WriteResult(data interface{}) error {
 		fmt.Println("Error creating file:", err)
 		return err
 	}
+	defer file.Close()
+
+	time.Sleep(3 * time.Second)
+
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(data)
 	if err != nil {
 		return errors.New("fail to write data")
 	}
-	file.Close()
 	return nil
 }
 

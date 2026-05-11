@@ -35,11 +35,13 @@ func (job *TaxIncludedPricesJob) LoadData() error {
 	return nil
 }
 
-func (job *TaxIncludedPricesJob) Process() error {
+func (job *TaxIncludedPricesJob) Process(doneChan chan bool, errChan chan error) {
 	err := job.LoadData()
+	//errChan <- errors.New("asdasd")
 	if err != nil {
 		fmt.Println("Error loading data:", err)
-		return err
+		errChan <- err
+		return
 	}
 	results := make(map[string]string)
 	for _, price := range job.InputPrices {
@@ -47,5 +49,7 @@ func (job *TaxIncludedPricesJob) Process() error {
 		results[fmt.Sprintf("%.2f", price)] = fmt.Sprintf("%.2f", taxIncludedPricesJob)
 	}
 	job.TaxIncludedPrices = results
-	return job.IOManager.WriteResult(job)
+	job.IOManager.WriteResult(job)
+	doneChan <- true
+
 }
